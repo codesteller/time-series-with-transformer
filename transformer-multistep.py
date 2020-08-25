@@ -11,8 +11,8 @@ from sklearn.preprocessing import MinMaxScaler
 
 torch.manual_seed(0)
 np.random.seed(0)
-input_window = 1000
-output_window = 10
+input_window = 100
+output_window = 5
 batch_size = 50 # batch size
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

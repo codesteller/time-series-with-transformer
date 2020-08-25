@@ -11,7 +11,7 @@ import argparse
 
 
 parser = argparse.ArgumentParser(description='Transformer model for time-series forecasting')
-parser.add_argument('--batch_size', type=int, default=768, help='')
+parser.add_argument('--batch_size', type=int, default=50, help='')
 parser.add_argument("--gpu_devices", type=int, nargs='+', default=None, help="")
 args = parser.parse_args()
 
@@ -20,8 +20,8 @@ os.environ["CUDA_VISIBLE_DEVICES"] = gpu_devices
 
 torch.manual_seed(0)
 np.random.seed(0)
-input_window = 1000
-output_window = 10
+input_window = 100
+output_window = 5
 
 
 class PositionalEncoding(nn.Module):
@@ -61,8 +61,11 @@ class TransAm(nn.Module):
     def forward(self,src):
         if self.src_mask is None or self.src_mask.size(0) != len(src):
             device = src.device
-            print("DEVICE: {}".format(device))
-            mask = self._generate_square_subsequent_mask(len(src)).to(device)
+            # print("DEVICE: {}".format(device))
+            # mask = self._generate_square_subsequent_mask(len(src)).to(device)
+            mask = (torch.triu(torch.ones(len(src), len(src))) == 1).transpose(0, 1).to(device)
+            mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0)).to(device)
+
             self.src_mask = mask
 
         src = self.pos_encoder(src)
@@ -70,10 +73,10 @@ class TransAm(nn.Module):
         output = self.decoder(output)
         return output
 
-    def _generate_square_subsequent_mask(self, sz):
-        mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
-        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
-        return mask
+    # def _generate_square_subsequent_mask(self, sz):
+    #     mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
+    #     mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+    #     return mask
 
 
 def create_inout_sequences(input_data, tw):
@@ -99,9 +102,9 @@ def get_data(device):
     amplitude = scaler.fit_transform(amplitude.reshape(-1, 1)).reshape(-1)
     
     
-    sampels = 2800
-    train_data = amplitude[:sampels]
-    test_data = amplitude[sampels:]
+    samples = 2800
+    train_data = amplitude[:samples]
+    test_data = amplitude[samples:]
 
     # convert our train data into a pytorch train tensor
     #train_tensor = torch.FloatTensor(train_data).view(-1)

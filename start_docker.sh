@@ -1,1 +1,1 @@
-docker run --gpus '"device=4,5"' --rm -it --ipc=host -v $(pwd):/workspace/time_series_train -w /workspace/time_series_train  nvcr.io/nvidia/pytorch:20.07-py3
+docker run --gpus '"device=4,5"' --rm -it -v $(pwd):/workspace/time_series_train -w /workspace/time_series_train  nvcr.io/nvidia/pytorch:20.07-py3

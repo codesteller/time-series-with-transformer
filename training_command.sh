@@ -1,0 +1,1 @@
+python transformer-multigpu.py --gpu_device 0 1 --batch_size 10
