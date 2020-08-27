@@ -9,6 +9,8 @@ from pandas import read_csv
 from sklearn.preprocessing import MinMaxScaler
 import argparse
 
+#python transformer-multigpu.py --gpu_devices 0 1 --batch_size 250
+
 
 parser = argparse.ArgumentParser(description='Transformer model for time-series forecasting')
 parser.add_argument('--batch_size', type=int, default=50, help='')
@@ -20,7 +22,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = gpu_devices
 
 torch.manual_seed(0)
 np.random.seed(0)
-input_window = 100
+input_window = 800
 output_window = 5
 
 
@@ -96,13 +98,13 @@ def create_inout_sequences(input_data, tw):
 
 def get_data(device):    
     
-    series = read_csv('daily-min-temperatures.csv', header=0, index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('daily-min-temperatures_new.csv', header=0, index_col=0, parse_dates=True, squeeze=True)
     scaler = MinMaxScaler(feature_range=(-1, 1)) 
     amplitude = series.to_numpy()
     amplitude = scaler.fit_transform(amplitude.reshape(-1, 1)).reshape(-1)
     
     
-    samples = 2800
+    samples = 8000
     train_data = amplitude[:samples]
     test_data = amplitude[samples:]
 
@@ -246,13 +248,8 @@ def main():
     for epoch in range(1, epochs + 1):
         epoch_start_time = time.time()
         train(train_data, model, optimizer, scheduler, epoch, batch_size, criterion)
-        
-        
-        if(epoch % 10 is 0):
-            val_loss = plot_and_loss(model, val_data, epoch, criterion)
-            predict_future(model, val_data,200)
-        else:
-            val_loss = evaluate(model, val_data, criterion)
+
+        val_loss = evaluate(model, val_data, criterion)
             
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.5f} | valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
@@ -264,7 +261,10 @@ def main():
         #    best_model = model
 
         scheduler.step() 
-
+    
+    print("Training Done...writing prediction plot")
+    #val_loss = plot_and_loss(model, val_data, epoch, criterion)
+    #predict_future(model, val_data,200)
 
 
 if __name__ == "__main__":
