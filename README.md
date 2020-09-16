@@ -5,5 +5,5 @@ With Pytorch NGC Container - Pull Tag - docker pull nvcr.io/nvidia/pytorch:20.07
 python transformer-multigpu.py --gpu_devices 0 1 --batch_size 200
 
 # Single GPU Training
-python transformer-multistep.py --batch_size 200
+python transformer-multigpu.py --gpu_devices 0 --batch_size 200
 

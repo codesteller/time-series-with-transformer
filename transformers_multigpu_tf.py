@@ -22,7 +22,7 @@ args = parser.parse_args()
 
 tf.random.set_seed(0)
 np.random.seed(0)
-input_window = 100
+input_window = 800
 output_window = 5
 
 def scaled_dot_product_attention(q, k, v, mask):
