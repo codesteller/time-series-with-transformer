@@ -22,7 +22,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = gpu_devices
 
 torch.manual_seed(0)
 np.random.seed(0)
-input_window = 800
+input_window = 500
 output_window = 5
 
 

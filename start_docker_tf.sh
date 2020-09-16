@@ -1,0 +1,1 @@
+docker run --gpus '"device=1"' --rm -it -v $(pwd):/workspace/time_series_train -w /workspace/time_series_train  nvcr.io/nvidia/tensorflow:20.08-tf2-py3
