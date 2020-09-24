@@ -16,9 +16,17 @@ parser.add_argument('--batch_size', type=int, default=50, help='')
 #parser.add_argument("--gpu_devices", type=int, nargs='+', default=None, help="")
 args = parser.parse_args()
 
-#TODO
+# TODO
 # gpu_devices = ','.join([str(id) for id in args.gpu_devices])
 # os.environ["CUDA_VISIBLE_DEVICES"] = gpu_devices
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+  try:
+    for gpu in gpus:
+      tf.config.experimental.set_memory_growth(gpu, True)
+  except RuntimeError as e:
+    print(e)
+
 
 tf.random.set_seed(0)
 np.random.seed(0)
@@ -159,7 +167,7 @@ def create_inout_sequences(input_data, tw):
     return tf.cast(inout_seq, dtype=tf.float32)
 
 def get_data():
-    series = read_csv('daily-min-temperatures_new.csv', header=0, index_col=0, parse_dates=True, squeeze=True)
+    series = read_csv('data/daily-min-temperatures_new.csv', header=0, index_col=0, parse_dates=True, squeeze=True)
     scaler = MinMaxScaler(feature_range=(-1, 1))
     amplitude = series.to_numpy()
     amplitude = scaler.fit_transform(amplitude.reshape(-1, 1)).reshape(-1)
@@ -186,7 +194,7 @@ def train(train_data, model, optimizer, epoch, batch_size, loss_object):
     total_loss = 0
     start_time=time.time()
     for batch, i in enumerate(range(0, len(train_data) - 1, batch_size)):
-        data, targets = get_batch(train_data, i,batch_size)
+        data, targets = get_batch(train_data, i, batch_size)
         data, targets = tf.transpose(targets, perm=[1, 0, 2]), tf.transpose(targets, perm=[1, 0, 2])
         with tf.GradientTape() as tape:
             output = model(data, training=True)
